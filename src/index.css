@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 255 144 42;
+    --color-secondary: 47 33 5;
+    --color-accent: 249 217 170;
+    --color-background: 246 235 218;
+    --color-light: 230 229 229;
+  }
+
+  html {
+    font-family: "Poppins", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+}
