@@ -18,6 +18,7 @@ export default {
         accent: 'rgb(var(--color-accent))',
         background: 'rgb(var(--color-background))',
         light: 'rgb(var(--color-light))',
+        card: 'rgb(var(--color-card))',
       },
       fontFamily: {
         sans: ['Poppins', 'sans-serif'],

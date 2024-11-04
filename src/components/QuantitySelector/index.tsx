@@ -1,26 +1,53 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function QuantitySelector() {
-  const [num, setNum] = useState(0)
+interface QuantitySelectorProps {
+  quantityInCart: number;
+  onChange: (quantity: number) => void;
+  min?: number;
+  max?: number;
+}
 
-  const handleCount = function (change: number) {
-    const newValue = num + change;
+export default function QuantitySelector({
+  quantityInCart,
+  onChange,
+  min = 1,
+  max = 100,
+}: QuantitySelectorProps) {
+  const [quantity, setQuantity] = useState<number>(quantityInCart);
 
-    if (newValue >= 0 && newValue <= 100) {
-      setNum(newValue);
+  useEffect(() => {
+    setQuantity(quantityInCart);
+  }, [quantityInCart]);
+
+  const increment = () => {
+    if (quantity < max) {
+      const newQuantity = quantity + 1;
+      setQuantity(newQuantity);
+      if (newQuantity !== quantity) {
+        onChange(newQuantity);
+      }
     }
-  }
+  };
 
+  const decrement = () => {
+    if (quantity > min) {
+      const newQuantity = quantity - 1;
+      setQuantity(newQuantity);
+      if (newQuantity !== quantity) {
+        onChange(newQuantity);
+      }
+    }
+  };
 
   return (
     <div className='flex items-center px-2 w-24 rounded-[6px] justify-between bg-light'>
-      <div className='flex text-[24px] cursor-pointer text-primary' onClick={() => handleCount(-1)}>
+      <button className='flex text-[24px] cursor-pointer text-primary' onClick={decrement} disabled={quantity <= min}>
         -
-      </div>
-      <p>{num}</p>
-      <div className='flex text-[24px] cursor-pointer text-primary' onClick={() => handleCount(+1)}>
+      </button>
+      <p>{quantity}</p>
+      <button className='flex text-[24px] cursor-pointer text-primary' onClick={increment} disabled={quantity >= max}>
         +
-      </div>
+      </button>
     </div>
   );
 }

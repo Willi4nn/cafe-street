@@ -1,13 +1,33 @@
-import { Product } from "../../pages/Home";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { useCart } from "../../hooks/useCart";
+import { Product } from "../../types/cart";
 import { PriceFormatter } from "../../utils/PriceFormatter";
 import CartIcon from "../CartIcon";
 import QuantitySelector from "../QuantitySelector";
 
-interface ProductItemProps {
-  product: Product;
+interface ProductProps {
+  product: Product
 }
 
-export function ProductItem({ product }: ProductItemProps) {
+export function ProductItem({ product }: ProductProps) {
+  const { addToCart } = useCart();
+  const [quantity, setQuantity] = useState(1);
+
+  const handleAddToCart = async (): Promise<void> => {
+    try {
+      if (quantity > 0) {
+        await addToCart(product, quantity);
+        toast.success(`Produto adicionado ao carrinho!`);
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar ao carrinho:', error);
+    } finally {
+
+      setQuantity(1);
+    }
+  }
+
   return (
     <article className="flex flex-col bg-white rounded-lg shadow-lg p-4 space-y-2 min-w-[225px]">
       <div className="relative">
@@ -22,7 +42,7 @@ export function ProductItem({ product }: ProductItemProps) {
           <span className="text-xl ml-1 text-yellow-400">★</span>
         </div>
       </div>
-      <div className="space-y-2">
+      <div className="flex flex-col space-y-2">
         <div className="flex justify-between gap-2 flex-wrap">
           <span className="font-semibold text-xl">
             {product.name}
@@ -30,20 +50,20 @@ export function ProductItem({ product }: ProductItemProps) {
           <PriceFormatter value={product.price} />
         </div>
 
-        <div className="flex justify-between items-center gap-2 ">
+        <div className="flex flex-col gap-2">
           <div className="flex gap-2 flex-wrap">
-            {product.available_temperature.map((temperature, index) => (
+            {product.available_temperature.map((temp, index) => (
               <div
                 key={index}
                 className="border-2 border-primary rounded-xl px-2 py-1 text-xs md:text-sm lg:text-base "
               >
-                {temperature}
+                {temp}
               </div>
             ))}
           </div>
-          <div className="flex gap-2 ">
-            <QuantitySelector />
-            <CartIcon />
+          <div className="flex gap-2 justify-end">
+            <QuantitySelector quantityInCart={quantity} onChange={setQuantity} min={0} max={100} />
+            <CartIcon onConfirm={handleAddToCart} />
           </div>
         </div>
       </div>

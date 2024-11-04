@@ -9,11 +9,13 @@
     --color-accent: 249 217 170;
     --color-background: 246 235 218;
     --color-light: 230 229 229;
+    --color-card: 243 242 242
   }
 
   html {
     font-family: "Poppins", sans-serif;
     -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
   }
 
   #root {

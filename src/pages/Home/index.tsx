@@ -6,81 +6,21 @@ import chooseYourCoffee from "../../assets/how-to-use/choose-your-coffee.png";
 import coffeeCup from "../../assets/how-to-use/coffee-cup.png";
 import foodTruck from "../../assets/how-to-use/food-truck.png";
 import introImg from "../../assets/intro.png";
-import { Header } from "../../components/Header";
 import { ProductItem } from "../../components/ProductItem";
+import { products } from "../../data/products";
 
 
-export interface Product {
-  id: number;
-  name: string;
-  rating: number;
-  price: number;
-  image: string;
-  available_temperature: string[];
-}
-
-export const products: Product[] = [
-  {
-    id: 1,
-    name: "Vanilla Latte",
-    rating: 4.8,
-    price: 21000,
-    image: "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTWXTp19C3OwoGMoiMBsC1jrvVWj5mQOfO7XJKoJ62M1SSiC79W", // Replace with the actual image URL
-    available_temperature: ["Hot", "Cold"],
-  },
-  {
-    id: 2,
-    name: "Espresso",
-    rating: 4.8,
-    price: 12000,
-    image: "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTWXTp19C3OwoGMoiMBsC1jrvVWj5mQOfO7XJKoJ62M1SSiC79W", // Replace with the actual image URL
-    available_temperature: ["Hot", "Cold"],
-  },
-  {
-    id: 3,
-    name: "Hazelnut Latte",
-    rating: 4.8,
-    price: 23000,
-    image: "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTWXTp19C3OwoGMoiMBsC1jrvVWj5mQOfO7XJKoJ62M1SSiC79W", // Replace with the actual image URL
-    available_temperature: ["Hot", "Cold"],
-  },
-  {
-    id: 4,
-    name: "Hazelnut Latte",
-    rating: 4.8,
-    price: 23000,
-    image: "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTWXTp19C3OwoGMoiMBsC1jrvVWj5mQOfO7XJKoJ62M1SSiC79W", // Replace with the actual image URL
-    available_temperature: ["Hot", "Cold"],
-  },
-  {
-    id: 5,
-    name: "Hazelnut Latte",
-    rating: 4.8,
-    price: 23000,
-    image: "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTWXTp19C3OwoGMoiMBsC1jrvVWj5mQOfO7XJKoJ62M1SSiC79W", // Replace with the actual image URL
-    available_temperature: ["Hot", "Cold"],
-  },
-  {
-    id: 6,
-    name: "Hazelnut Latte",
-    rating: 4.8,
-    price: 23000,
-    image: "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTWXTp19C3OwoGMoiMBsC1jrvVWj5mQOfO7XJKoJ62M1SSiC79W", // Replace with the actual image URL
-    available_temperature: ["Hot", "Cold"],
-  },
-];
 export default function Home() {
   const [searchInput, setSearchInput] = useState('');
 
   const filteredProducts = searchInput.length > 0
     ? products.filter((product) =>
-      Object.values(product).join('').toLowerCase().includes(searchInput.toLowerCase())
+      product.name.toLowerCase().includes(searchInput.toLowerCase())
     )
     : products;
 
   return (
     <>
-      <Header />
       <div className="bg-background">
         <img className="m-auto object-cover mt-[-104px]"
           src={introImg}
@@ -91,8 +31,8 @@ export default function Home() {
           <h1 className="text-2xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold whitespace-nowrap">Nossos Cafés</h1>
           <div className="w-full sm:flex-1 relative items-center">
             <MagnifyingGlass size={22} weight="bold" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input type="text" placeholder="Buscar produto" className="w-full h-[40px] pl-10 pr-3 rounded-lg shadow-lg 
-             border-2 focus:outline-none focus:border-orange-500 transition duration-100"
+            <input type="text" placeholder="Buscar produto" className="w-full p-4 pl-10 pr-3 rounded-lg shadow-lg 
+             border-2 focus:outline-none focus:border-orange-500"
               onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
@@ -113,7 +53,7 @@ export default function Home() {
           )}
         </div>
         <div className="flex flex-col mb-[300px]">
-          <section id="delivery">
+          <section id="delivery" className="scroll-mt-[104px]">
             <h2 className="text-2xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold">Como utilizar o serviço de entrega</h2>
             <div className="flex justify-around mt-7 flex-wrap">
               <div className="flex flex-col gap-4 items-center">
