@@ -11,7 +11,7 @@ export function App() {
   return (
     <Router>
       <CartProvider>
-        <ToastContainer autoClose={2000} />
+        <ToastContainer autoClose={2000} theme="colored"/>
         <Routes>
           <Route element={<DefaultLayout />}>
             <Route path="/" element={<Home />} />

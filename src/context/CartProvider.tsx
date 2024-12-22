@@ -2,7 +2,7 @@ import { createContext, PropsWithChildren } from 'react';
 import { useCart } from '../hooks/useCart';
 import { CartContextType } from '../types/cart';
 
-const initialCartValues: CartContextType = {
+export const CartContext = createContext<CartContextType>({
   cart: {},
   totalItems: 0,
   totalPrice: 0,
@@ -10,9 +10,7 @@ const initialCartValues: CartContextType = {
   removeFromCart: async () => { },
   updateQuantity: async () => { },
   clearCart: async () => { },
-};
-
-export const CartContext = createContext<CartContextType>(initialCartValues);
+});
 
 export function CartProvider({ children }: PropsWithChildren) {
   const cart = useCart();

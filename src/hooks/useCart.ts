@@ -16,6 +16,13 @@ export function useCart(): CartContextType {
         localStorage.removeItem("coffee-cart");
       }
     }
+  }, []);
+
+  useEffect(() => {
+    const savedCart = localStorage.getItem("coffee-cart");
+    if (savedCart == null) {
+      localStorage.setItem("coffee-cart", JSON.stringify(cart));
+    }
   }, [cart]);
 
   const totalItems = useMemo((): number => {
@@ -107,8 +114,9 @@ export function useCart(): CartContextType {
 
   const clearCart = async (): Promise<void> => {
     try {
-      setCart({});
-      localStorage.removeItem("coffee-cart");
+      const emptyCart = {};
+      setCart(emptyCart);
+      localStorage.setItem("coffee-cart", JSON.stringify(emptyCart));
     } catch (error) {
       console.error("Erro ao limpar carrinho:", error);
       throw error;

@@ -33,7 +33,7 @@ export default function CartIcon({ toShoppingCart = false, onConfirm }: CartIcon
   return (
     <button
       onClick={handleClick}
-      className={`flex flex-row p-2 rounded-md cursor-pointer 
+      className={`flex flex-row p-2 rounded-md cursor-pointer
         ${onConfirm ? "bg-primary" : "bg-transparent"} 
         ${isClicked ? "opacity-50" : "opacity-100"} 
         transition-opacity duration-500 ease-in-out`}

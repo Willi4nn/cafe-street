@@ -10,7 +10,7 @@ export default function LocationTag({ city, state }: LocationProps) {
     <div className="flex flex-row p-2 rounded-md border-r-6 bg-primary/10">
       <MapPin size={24} weight="fill" className="fill-primary" />
       <div className="flex flex-row items-center">
-        <p className="text-sm text-secundary font-semibold">{city},</p>
+        <p className="text-sm text-secundary font-semibold pr-1">{city},</p>
         <p className="text-sm text-secundary font-semibold">{state}</p>
       </div>
     </div>
