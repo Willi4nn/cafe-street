@@ -1,11 +1,21 @@
-import { Link } from 'react-router-dom';
+import { useContext } from "react";
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logoImg from '../../assets/logo-coffee.svg';
-import { useCart } from '../../hooks/useCart';
+import { CartContext } from "../../context/CartProvider";
 import CartIcon from '../CartIcon';
 import LocationTag from '../LocationTag';
 
 export function Header() {
-  const { totalItems } = useCart();
+  const { totalItems } = useContext(CartContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavigation = (hash: string): void => {
+    if (location.pathname !== '/') {
+      navigate('/');
+    }
+    window.location.hash = hash;
+  };
 
   return (
     <header className="sticky top-0 z-10 backdrop-blur-sm">
@@ -17,10 +27,22 @@ export function Header() {
             <img src={logoImg} alt="logo" />
           </Link>
           <ul className="hidden md:flex flex-wrap space-x-4 lg:space-x-8 text-sm font-semibold md:text-base">
-            <li><a href="#about-us" className="hover:text-primary">
-              Sobre Nós
-            </a></li>
-            <li><a href="#delivery" className="hover:text-primary">Entrega</a></li>
+            <li>
+              <button
+                onClick={() => handleNavigation('#about-us')}
+                className="hover:text-primary"
+              >
+                Sobre Nós
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => handleNavigation('#delivery')}
+                className="hover:text-primary"
+              >
+                Entrega
+              </button>
+            </li>
           </ul>
           <div className="flex gap-3 items-center relative">
             <LocationTag city="Patos de Minas" state="MG" />

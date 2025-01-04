@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Cart, CartContextType, Product } from "../types/cart";
 
 export const deliveryFee = 10.0;
+
 export function useCart(): CartContextType {
   const [cart, setCart] = useState<Cart>({});
 
@@ -17,13 +18,6 @@ export function useCart(): CartContextType {
       }
     }
   }, []);
-
-  useEffect(() => {
-    const savedCart = localStorage.getItem("coffee-cart");
-    if (savedCart == null) {
-      localStorage.setItem("coffee-cart", JSON.stringify(cart));
-    }
-  }, [cart]);
 
   const totalItems = useMemo((): number => {
     return Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
@@ -45,11 +39,12 @@ export function useCart(): CartContextType {
       if (quantity <= 0) return;
 
       setCart((prevCart) => {
-        const existingProduct = prevCart[product.id.toString()];
+        const productId = product.id.toString();
+        const existingProduct = prevCart[productId];
 
         const newCart = {
           ...prevCart,
-          [product.id.toString()]: {
+          [productId]: {
             ...product,
             quantity: existingProduct
               ? existingProduct.quantity + quantity

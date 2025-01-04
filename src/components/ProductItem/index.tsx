@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { toast } from "react-toastify";
-import { useCart } from "../../hooks/useCart";
+import { CartContext } from "../../context/CartProvider";
 import { Product } from "../../types/cart";
 import { PriceFormatter } from "../../utils/PriceFormatter";
 import CartIcon from "../CartIcon";
@@ -9,9 +9,8 @@ import QuantitySelector from "../QuantitySelector";
 interface ProductProps {
   product: Product
 }
-
 export function ProductItem({ product }: ProductProps) {
-  const { addToCart } = useCart();
+  const { addToCart } = useContext(CartContext);
   const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = async (): Promise<void> => {

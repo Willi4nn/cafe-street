@@ -1,12 +1,13 @@
 import { Trash } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import Orderform, { OrderFormData } from "../../components/OrderForm";
 import QuantitySelector from "../../components/QuantitySelector";
-import { deliveryFee, useCart } from "../../hooks/useCart";
+import { CartContext } from "../../context/CartProvider";
+import { deliveryFee } from "../../hooks/useCart";
 
 export default function ShoppingCart() {
-  const { cart, totalItems, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { cart, totalItems, totalPrice, removeFromCart, updateQuantity, clearCart } = useContext(CartContext);
   const [removingItemId, setRemovingItemId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 

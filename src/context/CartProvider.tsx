@@ -20,5 +20,4 @@ export function CartProvider({ children }: PropsWithChildren) {
       {children}
     </CartContext.Provider>
   )
-
 }

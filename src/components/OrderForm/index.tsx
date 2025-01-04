@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 const orderFormSchema = z.object({
-  cep: z.string().min(8, "CEP é obrigatório (8 caracteres)").max(9, "CEP inválido"),
+  cep: z.string().min(8, "CEP é obrigatório (8 caracteres)").max(8, "CEP inválido"),
   street: z.string().min(3, "Rua é obrigatória"),
   number: z.string().min(1, "Número é obrigatório"),
   complement: z.string().optional(),
