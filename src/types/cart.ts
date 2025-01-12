@@ -1,3 +1,5 @@
+import { OrderFormData } from "../components/OrderForm";
+
 export interface Product {
   id: number;
   name: string;
@@ -23,4 +25,17 @@ export interface CartContextType {
   removeFromCart: (productId: string) => Promise<void>;
   updateQuantity: (productId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
+}
+
+export interface CompletedOrder extends OrderFormData {
+  products: {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image: string;
+  }[];
+  totalItems: number;
+  deliveryFee: number;
+  totalPrice: number;
 }

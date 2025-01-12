@@ -118,6 +118,7 @@ export function useCart(): CartContextType {
     }
   };
 
+
   return {
     cart,
     totalItems,
@@ -125,6 +126,6 @@ export function useCart(): CartContextType {
     addToCart,
     removeFromCart,
     updateQuantity,
-    clearCart,
+    clearCart
   };
 }

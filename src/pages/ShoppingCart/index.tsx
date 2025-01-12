@@ -1,5 +1,7 @@
 import { Trash } from "@phosphor-icons/react";
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
+import { UseFormReturn } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Orderform, { OrderFormData } from "../../components/OrderForm";
 import QuantitySelector from "../../components/QuantitySelector";
@@ -10,6 +12,8 @@ export default function ShoppingCart() {
   const { cart, totalItems, totalPrice, removeFromCart, updateQuantity, clearCart } = useContext(CartContext);
   const [removingItemId, setRemovingItemId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const navigate = useNavigate();
+  const formRef = useRef<UseFormReturn<OrderFormData>>();
 
   const handleUpdateQuantity = (productId: string, quantity: number) => {
     if (quantity > 0) {
@@ -21,7 +25,6 @@ export default function ShoppingCart() {
 
   const handleRemoveFromCart = (productId: string) => {
     if (isProcessing) return;
-
     setIsProcessing(true);
     setRemovingItemId(productId);
 
@@ -35,25 +38,31 @@ export default function ShoppingCart() {
 
   const handleClearCart = () => {
     if (isProcessing) return;
-
     setIsProcessing(true);
     clearCart()
     toast.success(`Produtos removidos com sucesso!`);
     setIsProcessing(false);
   }
 
-  const handleConfirmOrder = () => {
+  const handleConfirmOrder = async () => {
+    try {
+      if (!Object.keys(cart).length) return toast.error("Carrinho está vazio!");
+      if (!formRef.current) return toast.error("Erro ao processar o formulário!");
 
-    if (Object.entries(cart).length === 0) {
-      toast.error("Carrinho está vazio!");
-      return;
-    }
+      const isValid = await formRef.current.trigger();
 
-    const formElement = document.getElementById('order-form') as HTMLFormElement;
-    if (formElement) {
-      formElement.dispatchEvent(
-        new Event('submit', { cancelable: true, bubbles: true })
-      );
+      if (!isValid) {
+        const errors = formRef.current.formState.errors;
+        const errorFields = Object.keys(errors).map((field) => field);
+        toast.error(`Preencha os campos obrigatórios: ${errorFields.join(", ")}`);
+        return;
+      }
+
+      formRef.current.handleSubmit(handleValidOrderSubmission)();
+
+    } catch (error) {
+      console.error("Erro ao confirmar pedido:", error);
+      toast.error("Erro ao processar o pedido. Tente novamente.");
     }
   };
 
@@ -73,20 +82,22 @@ export default function ShoppingCart() {
     };
 
     console.log("Pedido confirmado!", completeOrder);
-    localStorage.setItem("lastOrder", JSON.stringify(completeOrder));
+    localStorage.setItem("last-order", JSON.stringify(completeOrder));
 
     clearCart();
-    localStorage.removeItem("orderFormData");
+    localStorage.removeItem("order-form-data");
 
     toast.success("Pedido confirmado com sucesso!");
+    navigate("/order-completed");
   };
-
 
   return (
     <div className="flex justify-between gap-4 flex-wrap  px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto pb-10">
       <section className="flex-1 flex flex-col">
         <h2 className="font-semibold text-xl">Complete seu pedido</h2>
-        <Orderform onValidSubmit={handleValidOrderSubmission}
+        <Orderform
+          onValidSubmit={handleValidOrderSubmission}
+          formRef={formRef}
         />
       </section>
 

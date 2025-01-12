@@ -9,7 +9,7 @@ export const CartContext = createContext<CartContextType>({
   addToCart: async () => { },
   removeFromCart: async () => { },
   updateQuantity: async () => { },
-  clearCart: async () => { },
+  clearCart: async () => { }
 });
 
 export function CartProvider({ children }: PropsWithChildren) {
