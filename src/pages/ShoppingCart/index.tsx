@@ -104,7 +104,7 @@ export default function ShoppingCart() {
       <section className="flex-1 flex flex-col">
         <h2 className="font-semibold text-xl">Cafés selecionados</h2>
 
-        <section className="flex flex-col bg-card p-10 mt-4 rounded-tl-lg rounded-tr-[43px] rounded-bl-[43px] rounded-br-lg max-w-[550px]">
+        <section className="flex flex-col bg-card p-10 mt-4 rounded-tl-lg rounded-tr-[43px] rounded-bl-[43px] rounded-br-lg min-w-[300px] max-w-[550px]">
           {Object.entries(cart).length <= 0 ? (
             <div>Carrinho vazio</div>
           ) : (
