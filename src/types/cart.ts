@@ -14,7 +14,7 @@ export interface CartItem extends Product {
 }
 
 export interface Cart {
-  [itemId: string]: CartItem;
+  [productId: string]: CartItem;
 }
 
 export interface CartContextType {

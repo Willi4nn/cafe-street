@@ -3,6 +3,7 @@ import { Bank, CreditCard, CurrencyDollar, MapPin, Money } from "@phosphor-icons
 import { useEffect } from "react";
 import { Controller, UseFormReturn, useForm } from "react-hook-form";
 import InputMask from 'react-input-mask';
+import { toast } from "react-toastify";
 import { z } from "zod";
 
 const orderFormSchema = z.object({
@@ -20,9 +21,8 @@ const orderFormSchema = z.object({
 
 export type OrderFormData = z.infer<typeof orderFormSchema>;
 
-interface OrderformProps {
-  onOrderFormDataChange?: (data: OrderFormData | null) => void;
-  onValidSubmit?: (data: OrderFormData) => void;
+interface OrderFormProps {
+  onOrderSubmit: (data: OrderFormData) => void;
   formRef?: React.MutableRefObject<UseFormReturn<OrderFormData> | undefined>;
 }
 
@@ -37,16 +37,9 @@ const defaultValues = {
   paymentMethod: undefined
 };
 
-const paymentMethodOptions = [
-  { label: 'CARTÃO DE CRÉDITO', value: 'Cartão de Crédito' },
-  { label: 'CARTÃO DE DÉBITO', value: 'Cartão de Débito' },
-  { label: 'DINHEIRO', value: 'Dinheiro' },
-];
-
-export default function Orderform({ onOrderFormDataChange, onValidSubmit, formRef }: OrderformProps) {
+export default function Orderform({ onOrderSubmit, formRef }: OrderFormProps) {
   const methods = useForm<OrderFormData>({
     resolver: zodResolver(orderFormSchema),
-    mode: 'onChange',
     defaultValues
   });
 
@@ -54,10 +47,7 @@ export default function Orderform({ onOrderFormDataChange, onValidSubmit, formRe
     register,
     handleSubmit,
     control,
-    formState: { errors },
-    setValue,
-    watch,
-    reset,
+    formState: { errors }
   } = methods;
 
   useEffect(() => {
@@ -66,44 +56,13 @@ export default function Orderform({ onOrderFormDataChange, onValidSubmit, formRe
     }
   }, [formRef, methods]);
 
-  useEffect(() => {
-    const savedData = localStorage.getItem('order-form-data');
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        const validationResult = orderFormSchema.safeParse(parsedData);
-
-        if (validationResult.success) {
-          Object.keys(parsedData).forEach(key => {
-            setValue(key as keyof OrderFormData, parsedData[key]);
-          });
-        }
-      } catch (error) {
-        console.error('Erro ao analisar os dados do formulário:', error);
-      }
-    }
-  }, [setValue]);
-
-  const formData = watch();
-  useEffect(() => {
-    if (methods.formState.isValid) {
-      localStorage.setItem('order-form-data', JSON.stringify(formData));
-
-      if (onOrderFormDataChange) {
-        onOrderFormDataChange(formData);
-      }
-    }
-  }, [formData, methods.formState.isValid, onOrderFormDataChange]);
-
   const onSubmit = (data: OrderFormData) => {
-    if (onValidSubmit) {
-      onValidSubmit(data);
-    }
-    reset();
+    onOrderSubmit(data);
+    toast.success("Dados confirmados!");
   };
 
   return (
-    <form id="order-form" onSubmit={handleSubmit(onSubmit)}>
+    <form id="order-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
       <section className="flex flex-col p-10 mt-4 rounded-md bg-card">
         <article className="flex mb-6 items-start">
           <MapPin className="text-primary" size={24} style={{ marginRight: '10px' }} />
@@ -201,7 +160,7 @@ export default function Orderform({ onOrderFormDataChange, onValidSubmit, formRe
         </div>
       </section>
 
-      <section className="flex flex-col p-10 mt-4 rounded-md bg-card">
+      <section className="flex flex-col p-10 rounded-md bg-card">
         <article className="flex mb-6 items-start">
           <CurrencyDollar className="text-purple-500" size={24} style={{ marginRight: '10px' }} />
           <div>
@@ -214,26 +173,31 @@ export default function Orderform({ onOrderFormDataChange, onValidSubmit, formRe
           name="paymentMethod"
           control={control}
           render={({ field }) => (
-            <div className="flex flex-row justify-between flex-wrap gap-2">
-              {paymentMethodOptions.map(option => (
+            <div className="flex gap-3">
+              {["Cartão de Crédito", "Cartão de Débito", "Dinheiro"].map((method) => (
                 <button
-                  key={option.value}
+                  key={method}
                   type="button"
-                  onClick={() => field.onChange(option.value)}
-                  className={`flex items-center p-4 rounded cursor-pointer active:bg-purple-300 transition duration-200
-                  ${field.value === option.value ? 'bg-purple-200 shadow shadow-purple-500' : 'bg-light'}`}
+                  onClick={() => field.onChange(method)}
+                  className={`p-4 rounded-md cursor-pointer transition ${field.value === method ? "bg-green-200" : "bg-gray-200"
+                    }`}
                 >
-                  {option.value === 'Cartão de Crédito' && <CreditCard className="text-purple-500" size={16} style={{ marginRight: '12px' }} />}
-                  {option.value === 'Cartão de Débito' && <Bank className="text-purple-500" size={16} style={{ marginRight: '12px' }} />}
-                  {option.value === 'Dinheiro' && <Money className="text-purple-500" size={16} style={{ marginRight: '12px' }} />}
-                  <p className="text-xs">{option.label}</p>
+                  {method === "Cartão de Crédito" && <CreditCard className="mr-2" />}
+                  {method === "Cartão de Débito" && <Bank className="mr-2" />}
+                  {method === "Dinheiro" && <Money className="mr-2" />}
+                  {method}
                 </button>
               ))}
             </div>
           )}
         />
-        {errors.paymentMethod && <p className="text-red-500 text-sm mt-2 text-center">{errors.paymentMethod.message}</p>}
+        {errors.paymentMethod && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.paymentMethod.message}
+          </p>
+        )}
       </section>
+      <button type="submit" className="w-full py-3 rounded-md bg-green-500 text-white font-bold">CONFIRMAR</button>
     </form>
   );
 }
