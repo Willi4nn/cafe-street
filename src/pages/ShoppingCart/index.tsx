@@ -1,19 +1,23 @@
 import { Trash } from "@phosphor-icons/react";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import { useContext, useRef, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Orderform, { OrderFormData } from "../../components/OrderForm";
+import OrderForm, { OrderFormData } from "../../components/OrderForm";
 import QuantitySelector from "../../components/QuantitySelector";
+import StripeCheckout from "../../components/StripeCheckout";
 import { CartContext } from "../../context/CartProvider";
 import { deliveryFee } from "../../hooks/useCart";
 
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY as string);
+
 export default function ShoppingCart() {
-  const { cart, totalItems, totalPrice, removeFromCart, updateQuantity, clearCart } = useContext(CartContext);
+  const { cart, totalPrice, removeFromCart, updateQuantity, clearCart } = useContext(CartContext);
   const [removingItemId, setRemovingItemId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const navigate = useNavigate();
   const formRef = useRef<UseFormReturn<OrderFormData>>();
+  const [orderData, setOrderData] = useState<OrderFormData | null>(null);
 
   const handleUpdateQuantity = (productId: string, quantity: number) => {
     if (quantity > 0) {
@@ -39,123 +43,63 @@ export default function ShoppingCart() {
   const handleClearCart = () => {
     if (isProcessing) return;
     setIsProcessing(true);
-    clearCart()
+    clearCart();
     toast.success(`Produtos removidos com sucesso!`);
     setIsProcessing(false);
-  }
-
-  const handleConfirmOrder = async () => {
-    try {
-      if (!Object.keys(cart).length) return toast.error("Carrinho está vazio!");
-      if (!formRef.current) return toast.error("Erro ao processar o formulário!");
-
-      const isValid = await formRef.current.trigger();
-
-      if (!isValid) {
-        const errors = formRef.current.formState.errors;
-        const errorFields = Object.keys(errors).map((field) => field);
-        toast.error(`Preencha os campos obrigatórios: ${errorFields.join(", ")}`);
-        return;
-      }
-
-      formRef.current.handleSubmit(handleValidOrderSubmission)();
-
-    } catch (error) {
-      console.error("Erro ao confirmar pedido:", error);
-      toast.error("Erro ao processar o pedido. Tente novamente.");
-    }
   };
 
-  const handleValidOrderSubmission = (data: OrderFormData) => {
-    const completeOrder = {
+  const handleConfirmOrder = async (data: OrderFormData) => {
+    setOrderData(data);
+
+    const completedOrder = {
       ...data,
-      products: Object.entries(cart).map(([productId, product]) => ({
-        id: productId,
-        name: product.name,
-        price: product.price,
-        quantity: product.quantity,
-        image: product.image
-      })),
-      totalItems: totalPrice,
-      deliveryFee: deliveryFee,
-      totalPrice: totalPrice + deliveryFee
+      products: Object.values(cart),
+      totalItems: Object.values(cart).reduce((sum, item) => sum + item.quantity, 0),
+      deliveryFee,
+      totalPrice,
     };
 
-    console.log("Pedido confirmado!", completeOrder);
-    localStorage.setItem("last-order", JSON.stringify(completeOrder));
-
-    clearCart();
-    localStorage.removeItem("order-form-data");
-
-    toast.success("Pedido confirmado com sucesso!");
-    navigate("/order-completed");
+    localStorage.setItem("completed-order", JSON.stringify(completedOrder));
   };
 
+  const isCartEmpty = Object.entries(cart).length <= 0;
+
   return (
-    <div className="flex justify-between gap-4 flex-wrap  px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto pb-10">
+    <div className="flex justify-between gap-4 flex-wrap px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto pb-10">
       <section className="flex-1 flex flex-col">
         <h2 className="font-semibold text-xl">Complete seu pedido</h2>
-        <Orderform
-          onValidSubmit={handleValidOrderSubmission}
-          formRef={formRef}
-        />
+        <OrderForm onOrderSubmit={handleConfirmOrder} formRef={formRef} />
       </section>
 
       <section className="flex-1 flex flex-col">
         <h2 className="font-semibold text-xl">Cafés selecionados</h2>
 
-        <section className="flex flex-col bg-card p-10 mt-4 rounded-tl-lg rounded-tr-[43px] rounded-bl-[43px] rounded-br-lg min-w-[300px] max-w-[550px]">
-          {Object.entries(cart).length <= 0 ? (
+        <section className="flex flex-col bg-card p-10 mt-4 rounded-md min-w-[300px] max-w-[550px]">
+          {isCartEmpty ? (
             <div>Carrinho vazio</div>
           ) : (
             <>
               {Object.entries(cart).map(([productId, product]) => (
-                <article
-                  key={productId}
-                  className={`flex justify-between flex-wrap pb-6 pt-6 border-b border-light transition-opacity duration-300 ${removingItemId === productId ? 'opacity-0' : 'opacity-100'
-                    }`}
-                >
+                <article key={productId} className={`flex justify-between flex-wrap pb-6 pt-6 border-b transition-opacity ${removingItemId === productId ? 'opacity-0' : 'opacity-100'}`}>
                   <div className="flex gap-5 items-center">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="h-16"
-                    />
-
+                    <img src={product.image} alt={product.name} className="h-16" />
                     <div className="flex flex-col gap-2">
-                      <div>
-                        <p>{product.name}</p>
-                      </div>
-                      <div className="flex gap-2 items-center flex-wrap">
-                        <div>
-                          <QuantitySelector
-                            onChange={(quantity) => handleUpdateQuantity(productId, quantity)}
-                            quantityInCart={product.quantity}
-                            min={0}
-                            max={100}
-                          />
-                        </div>
-                        <button
-                          onClick={() => handleRemoveFromCart(productId)}
-                          disabled={isProcessing}
-                          className="flex items-center bg-light rounded-md text-xs p-2 h-[38px] active:bg-light/50 transition-colors duration-200"
-                        >
-                          <Trash size={16} className="text-primary mr-1" />
-                          REMOVER
+                      <p>{product.name}</p>
+                      <div className="flex gap-2 items-center">
+                        <QuantitySelector onChange={(quantity) => handleUpdateQuantity(productId, quantity)} quantityInCart={product.quantity} />
+                        <button onClick={() => handleRemoveFromCart(productId)} disabled={isProcessing} className="flex items-center bg-light rounded-md text-xs p-2">
+                          <Trash size={16} className="text-primary mr-1" /> REMOVER
                         </button>
                       </div>
                     </div>
                   </div>
-                  <p className="text-base text-[--base-text] font-bold">
-                    R$ {product.price.toFixed(2)}
-                  </p>
+                  <p className="text-base font-bold">R$ {product.price.toFixed(2)}</p>
                 </article>
               ))}
-
               <article className="flex flex-col py-6 gap-3">
                 <div className="flex justify-between">
-                  <p>Total de itens</p>
-                  <p>R$ {totalItems.toFixed(2)}</p>
+                  <p>Itens</p>
+                  <p>R$ {(totalPrice - deliveryFee).toFixed(2)}</p>
                 </div>
                 <div className="flex justify-between">
                   <p>Entrega</p>
@@ -167,16 +111,23 @@ export default function ShoppingCart() {
                 </div>
               </article>
               <div className="flex flex-col gap-2">
-                <button className="flex items-center w-full bg-red-500 text-white rounded-md py-3 font-bold text-center active:bg-red-500/50 transition duration-200 justify-center" onClick={() => handleClearCart()}>
-                  <Trash size={20} className="text-white mr-1" weight="fill" />
-                  LIMPAR CARRINHO
-                </button>
                 <button
-                  type="button"
-                  onClick={handleConfirmOrder}
-                  className="w-full bg-primary text-white rounded-md py-3 font-bold text-center active:bg-primary/50 transition duration-200">
-                  CONFIRMAR PEDIDO
+                  className="flex items-center justify-center w-full bg-red-500 text-white rounded-md py-3 font-bold"
+                  onClick={handleClearCart}
+                  disabled={isProcessing}
+                >
+                  <Trash size={20} className="text-white mr-1" weight="fill" /> LIMPAR CARRINHO
                 </button>
+
+                {orderData && (
+                  <Elements stripe={stripePromise}>
+                    <StripeCheckout
+                      cartItems={Object.values(cart)}
+                      selectedPaymentMethod={formRef.current?.watch("paymentMethod") || ""}
+                      formRef={formRef}
+                    />
+                  </Elements>
+                )}
               </div>
             </>
           )}

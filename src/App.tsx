@@ -1,3 +1,4 @@
+
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -6,6 +7,7 @@ import DefaultLayout from './layout/DefaultLayout'
 import Home from './pages/Home'
 import OrderCompleted from './pages/OrderCompleted'
 import ShoppingCart from './pages/ShoppingCart'
+
 
 export function App() {
 

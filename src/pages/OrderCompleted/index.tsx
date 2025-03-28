@@ -8,7 +8,7 @@ export default function OrderCompleted() {
   const [order, setOrder] = useState<CompletedOrder | null>(null);
 
   useEffect(() => {
-    const completedOrder = localStorage.getItem("last-order");
+    const completedOrder = localStorage.getItem("completed-order");
     if (completedOrder) {
       setOrder(JSON.parse(completedOrder));
     }
