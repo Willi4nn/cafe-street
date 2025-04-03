@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Bank, CreditCard, CurrencyDollar, MapPin, Money } from "@phosphor-icons/react";
+import axios from "axios";
 import { useEffect } from "react";
 import { Controller, UseFormReturn, useForm } from "react-hook-form";
 import InputMask from 'react-input-mask';
@@ -7,7 +8,7 @@ import { toast } from "react-toastify";
 import { z } from "zod";
 
 const orderFormSchema = z.object({
-  cep: z.string().min(9, "CEP é obrigatório (8 caracteres)").max(9, "CEP inválido"),
+  cep: z.string().min(8, "CEP é obrigatório (8 caracteres)").max(9, "CEP inválido"),
   street: z.string().min(3, "Rua é obrigatória"),
   number: z.string().min(1, "Número é obrigatório"),
   complement: z.string().optional(),
@@ -46,9 +47,38 @@ export default function Orderform({ onOrderSubmit, formRef }: OrderFormProps) {
   const {
     register,
     handleSubmit,
+    setValue,
     control,
+    watch,
     formState: { errors }
   } = methods;
+
+  const cep = watch("cep");
+
+  useEffect(() => {
+    if (!cep) return;
+    const cleanedCep = cep.replace(/\D/g, "");
+
+    if (cleanedCep.length === 8) {
+      axios
+        .get(`https://viacep.com.br/ws/${cleanedCep}/json/`)
+        .then((response) => {
+          if (response.data.erro) {
+            toast.error("CEP não encontrado.");
+            return;
+          }
+          const { logradouro, bairro, localidade, uf } = response.data;
+          setValue("street", logradouro || "");
+          setValue("neighborhood", bairro || "");
+          setValue("city", localidade || "");
+          setValue("state", uf || "");
+        })
+        .catch((error) => {
+          console.error("CEP lookup error:", error);
+          toast.error("Erro ao buscar o CEP. Tente novamente.");
+        })
+    }
+  }, [cep, setValue]);
 
   useEffect(() => {
     if (formRef) {
