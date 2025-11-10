@@ -10,9 +10,12 @@ React + Vite + TypeScript + Tailwind | Express + Stripe API
 # Instalar
 npm install
 
-# Criar .env na raiz
+# Criar .env na raiz. Chaves do Stripe (precisa das duas para rodar local)
 VITE_STRIPE_PUBLIC_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
+
+# URL da API local
+VITE_API_BASE_URL=http://localhost:3333
 
 # Terminal 1 - Backend
 cd server && npx ts-node-dev --respawn --transpile-only stripe.ts

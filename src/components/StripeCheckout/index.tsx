@@ -44,7 +44,9 @@ export default function StripeCheckout({ cartItems, selectedPaymentMethod, formR
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3333/create-checkout-session", {
+      const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
+      const response = await fetch(`${apiUrl}/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items: cartItems }),

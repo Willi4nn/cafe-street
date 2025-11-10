@@ -20,9 +20,20 @@ const stripe = new Stripe(secretKey, {
   apiVersion: "2025-02-24.acacia",
 });
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://cafe-street-zeta.vercel.app",
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Origem não permitida pelo CORS"));
+      }
+    },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -60,8 +71,8 @@ app.post("/create-checkout-session", async (req: Request, res: Response) => {
       payment_method_types: ["card"],
       line_items: paymentItems,
       mode: "payment",
-      success_url: "http://localhost:5173/order-completed",
-      cancel_url: "http://localhost:5173/shopping-cart",
+      success_url: "https://cafe-street-zeta.vercel.app/order-completed",
+      cancel_url: "https://cafe-street-zeta.vercel.app/shopping-cart",
     });
 
     console.log("Sessão criada com sucesso:", session.id);
@@ -79,7 +90,6 @@ app.post("/create-checkout-session", async (req: Request, res: Response) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
-  console.log(`🔗 URL: http://localhost:${PORT}`);
   console.log(
     `🔑 STRIPE_SECRET_KEY presente: ${!!process.env.STRIPE_SECRET_KEY}`
   );
