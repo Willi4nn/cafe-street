@@ -15,7 +15,7 @@ export default function Home() {
 
   const filteredProducts = searchInput.length > 0
     ? products.filter((product) =>
-      product.name.toLowerCase().includes(searchInput.toLowerCase())
+      product.name.toLowerCase().includes(searchInput.trim().toLowerCase())
     )
     : products;
 

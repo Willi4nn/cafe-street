@@ -28,10 +28,6 @@ export default function StripeCheckout({ cartItems, selectedPaymentMethod, formR
       return;
     }
 
-    if (formRef.current) {
-      formRef.current.reset();
-    }
-
     if (selectedPaymentMethod === "Dinheiro") {
       toast.success("Pedido confirmado! Pagamento será feito na entrega.");
       navigate('/order-completed')
@@ -65,6 +61,8 @@ export default function StripeCheckout({ cartItems, selectedPaymentMethod, formR
 
       clearCart();
       localStorage.removeItem("coffee-cart");
+
+      if (formRef.current) formRef.current.reset();
       window.location.href = data.url;
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Erro ao processar pagamento.";

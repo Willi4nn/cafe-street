@@ -8,5 +8,5 @@ export function PriceFormatter({ value }: PriceFormatterProps) {
     currency: 'BRL',
   }).format(value);
 
-  return <span className="font-semibold text-xl">{formattedPrice}</span>;
+  return <span className="font-semibold text-md">{formattedPrice}</span>;
 }

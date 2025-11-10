@@ -53,7 +53,13 @@ export default function ShoppingCart() {
 
     const completedOrder = {
       ...data,
-      products: Object.values(cart),
+      products: Object.values(cart).map(item => ({
+        id: item.id.toString(),
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+      })),
       totalItems: Object.values(cart).reduce((sum, item) => sum + item.quantity, 0),
       deliveryFee,
       totalPrice,
@@ -93,7 +99,7 @@ export default function ShoppingCart() {
                       </div>
                     </div>
                   </div>
-                  <p className="text-base font-bold">R$ {product.price.toFixed(2)}</p>
+                  <p className="text-base font-bold">R$ {(product.price * product.quantity).toFixed(2)}</p>
                 </article>
               ))}
               <article className="flex flex-col py-6 gap-3">
@@ -123,7 +129,7 @@ export default function ShoppingCart() {
                   <Elements stripe={stripePromise}>
                     <StripeCheckout
                       cartItems={Object.values(cart)}
-                      selectedPaymentMethod={formRef.current?.watch("paymentMethod") || ""}
+                      selectedPaymentMethod={orderData.paymentMethod}
                       formRef={formRef}
                     />
                   </Elements>

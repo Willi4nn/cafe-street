@@ -2,7 +2,7 @@ import { Clock, CurrencyDollar, MapPin } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import ImgScooter from "../../assets/delivery-scooter.png";
 import { CompletedOrder } from "../../types/cart";
-
+import { PriceFormatter } from "../../utils/PriceFormatter";
 
 export default function OrderCompleted() {
   const [order, setOrder] = useState<CompletedOrder | null>(null);
@@ -23,7 +23,7 @@ export default function OrderCompleted() {
   }
 
   return (
-    <div className="flex p-6 mx-auto px-4 sm:px-6 lg:px-12 max-w-7xl justify-between flex-wrap ">
+    <div className="flex p-6 mx-auto px-4 sm:px-6 lg:px-12 max-w-7xl justify-between flex-wrap">
       <div>
         <h1 className="text-3xl font-bold text-primary mb-4">
           Uhu! Pedido confirmado
@@ -68,11 +68,49 @@ export default function OrderCompleted() {
             </div>
           </div>
         </div>
+        <div className="mt-2 bg-white rounded-md shadow-sm p-6">
+          <h3 className="text-lg font-semibold mb-4">Produtos do pedido</h3>
+          <ul className="space-y-4">
+            {order.products.map((p) => (
+              <li key={p.id} className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  {p.image && (
+                    <img src={p.image} alt={p.name} className="w-16 h-16 object-cover rounded" />
+                  )}
+                  <div>
+                    <p className="font-medium">{p.name}</p>
+                    <p className="text-md text-gray-500">Quantidade: {p.quantity}</p>
+                    <p className="text-md text-gray-500">Preço unitário: <PriceFormatter value={p.price} /></p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">
+                    <PriceFormatter value={p.price * p.quantity} />
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-3 border-t pt-4 space-y-2">
+            <div className="flex justify-between text-sm text-gray-600">
+              <p className="text-md text-gray-500">Itens</p>
+              <PriceFormatter value={order.totalPrice - order.deliveryFee} />
+            </div>
+            <div className="flex justify-between text-sm text-gray-600">
+              <p className="text-md text-gray-500">Entrega</p>
+              <PriceFormatter value={order.deliveryFee} />
+            </div>
+            <div className="flex justify-between text-lg font-bold">
+              <p className="text-md text-gray-500">Total do pedido</p>
+              <PriceFormatter value={order.totalPrice} />
+            </div>
+          </div>
+        </div>
       </div>
-      <img
-        src={ImgScooter}
-        alt="Entregador de scooter"
-      />
+      <div className="flex items-center justify-center ">
+        <img src={ImgScooter} className="object-contain" />
+      </div>
 
     </div >
 

@@ -203,7 +203,7 @@ export default function Orderform({ onOrderSubmit, formRef }: OrderFormProps) {
           name="paymentMethod"
           control={control}
           render={({ field }) => (
-            <div className="flex gap-3">
+            <div className="flex gap-3 justify-between flex-wrap">
               {["Cartão de Crédito", "Cartão de Débito", "Dinheiro"].map((method) => (
                 <button
                   key={method}
