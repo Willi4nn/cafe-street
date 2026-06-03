@@ -1,71 +1,105 @@
-import { useContext, useState } from "react";
-import { toast } from "react-toastify";
-import { CartContext } from "../../context/CartProvider";
-import { Product } from "../../types/cart";
-import { PriceFormatter } from "../../utils/PriceFormatter";
-import CartIcon from "../CartIcon";
-import QuantitySelector from "../QuantitySelector";
+import { useCallback, useContext, useState } from 'react';
+import { toast } from 'react-toastify';
+import { CartContext } from '../../context/CartProvider';
+import { Product } from '../../types/cart';
+import { PriceFormatter } from '../../utils/PriceFormatter';
+import CartIcon from '../CartIcon';
+import QuantitySelector from '../QuantitySelector';
 
-interface ProductProps {
-  product: Product
+interface ProductItemProps {
+  product: Product;
 }
-export function ProductItem({ product }: ProductProps) {
+
+export function ProductItem({ product }: ProductItemProps) {
   const { addToCart } = useContext(CartContext);
+
   const [quantity, setQuantity] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
 
-  const handleAddToCart = async (): Promise<void> => {
+  const handleAddToCart = useCallback(async () => {
+    if (quantity <= 0) return;
+
+    setIsAdding(true);
     try {
-      if (quantity > 0) {
-        await addToCart(product, quantity);
-        toast.success(`Produto adicionado ao carrinho!`);
-      }
-    } catch (error) {
-      console.error('Erro ao adicionar ao carrinho:', error);
-    } finally {
-
+      await addToCart(product, quantity);
+      toast.success(`${product.name} adicionado ao carrinho!`);
       setQuantity(1);
+    } catch {
+      toast.error('Houve um erro ao adicionar seu produto.');
+    } finally {
+      setIsAdding(false);
     }
-  }
+  }, [addToCart, product, quantity]);
 
   return (
-    <article className="flex flex-col bg-white rounded-lg shadow-lg p-4 space-y-2 min-w-[225px]">
-      <div className="relative">
+    <article
+      className="flex flex-col bg-card rounded-2xl shadow-sm p-4 gap-4 min-w-[250px] border border-transparent hover:border-primary/20 hover:shadow-lg transition-all duration-300 focus-within:ring-2 focus-within:ring-primary"
+      aria-labelledby={`product-title-${product.id}`}
+    >
+      {/* Imagem do Produto com aspect-ratio nativo em vez de heights hardcoded */}
+      <figure className="relative aspect-square w-full rounded-xl overflow-hidden bg-light group">
         <img
           src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover rounded-lg"
-          height={226}
+          alt={`Foto ilustrativa de ${product.name}`}
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="flex absolute top-4 left-4 bg-white rounded-full items-center py-1 px-4">
-          <span className="text-lg font-bold">{product.rating.toFixed(1)}</span>
-          <span className="text-xl ml-1 text-yellow-400">★</span>
-        </div>
-      </div>
-      <div className="flex flex-col space-y-2">
-        <div className="flex justify-between gap-2 flex-wrap">
-          <span className="font-semibold text-xl">
-            {product.name}
+        <div
+          className="absolute top-3 left-3 bg-white/90 backdrop-blur-md rounded-full flex items-center px-3 py-1 shadow-sm"
+          aria-label={`Avaliação de ${product.rating} estrelas`}
+          title={`Avaliação de ${product.rating} estrelas`}
+        >
+          <span className="text-sm font-bold text-secondary mr-1">
+            {product.rating.toFixed(1)}
           </span>
-          <PriceFormatter value={product.price} />
+          <span className="text-sm text-primary" aria-hidden="true">
+            ★
+          </span>
         </div>
+      </figure>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2 flex-wrap">
-            {product.available_temperature.map((temp, index) => (
-              <div
-                key={index}
-                className="border-2 border-primary rounded-xl px-2 py-1 text-xs md:text-sm lg:text-base "
-              >
-                {temp}
-              </div>
-            ))}
+      <div className="flex flex-col flex-1 justify-between gap-5">
+        <header className="flex justify-between items-start gap-4">
+          <h3
+            id={`product-title-${product.id}`}
+            className="font-bold text-xl text-secondary leading-tight line-clamp-2"
+          >
+            {product.name}
+          </h3>
+          <div className="text-primary font-bold text-lg whitespace-nowrap">
+            <PriceFormatter value={product.price} />
           </div>
-          <div className="flex gap-2 justify-end">
-            <QuantitySelector quantityInCart={quantity} onChange={setQuantity} min={0} max={100} />
-            <CartIcon onConfirm={handleAddToCart} />
-          </div>
-        </div>
+        </header>
+
+        <section
+          aria-label="Opções de temperatura"
+          className="flex flex-wrap gap-2"
+        >
+          {product.available_temperature.map((temp) => (
+            <span
+              key={temp}
+              className="text-[10px] border-2 border-primary/20 px-2.5 py-1.5 bg-primary/10 text-primary rounded-md uppercase tracking-widest font-bold"
+            >
+              {temp}
+            </span>
+          ))}
+        </section>
+
+        <footer className="flex items-center justify-between gap-3 mt-auto pt-5 border-t border-light/60">
+          <QuantitySelector
+            quantityInCart={quantity}
+            onChange={setQuantity}
+            min={1}
+            max={99}
+            aria-label="Selecionar quantidade"
+          />
+          <CartIcon
+            onConfirm={handleAddToCart}
+            isLoading={isAdding}
+            aria-label={`Adicionar ${quantity} ${product.name} ao carrinho`}
+          />
+        </footer>
       </div>
     </article>
-  )
+  );
 }

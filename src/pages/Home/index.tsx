@@ -1,60 +1,73 @@
-import { MagnifyingGlass } from "@phosphor-icons/react";
-import { useState } from "react";
-import aboutUsBg from "../../assets/about-us/bg-about-us.png";
-import coffeeAbout from "../../assets/about-us/coffee-about.png";
-import chooseYourCoffee from "../../assets/how-to-use/choose-your-coffee.png";
-import coffeeCup from "../../assets/how-to-use/coffee-cup.png";
-import foodTruck from "../../assets/how-to-use/food-truck.png";
-import introImg from "../../assets/intro.png";
-import { ProductItem } from "../../components/ProductItem";
-import { products } from "../../data/products";
-
+import { MagnifyingGlass } from '@phosphor-icons/react';
+import { useState } from 'react';
+import aboutUsBg from '../../assets/about-us/bg-about-us.png';
+import coffeeAbout from '../../assets/about-us/coffee-about.png';
+import chooseYourCoffee from '../../assets/how-to-use/choose-your-coffee.png';
+import coffeeCup from '../../assets/how-to-use/coffee-cup.png';
+import foodTruck from '../../assets/how-to-use/food-truck.png';
+import introImg from '../../assets/intro.png';
+import { ProductItem } from '../../components/ProductItem';
+import { products } from '../../data/products';
 
 export default function Home() {
   const [searchInput, setSearchInput] = useState('');
 
-  const filteredProducts = searchInput.length > 0
-    ? products.filter((product) =>
-      product.name.toLowerCase().includes(searchInput.trim().toLowerCase())
-    )
-    : products;
+  const filteredProducts =
+    searchInput.length > 0
+      ? products.filter((product) =>
+          product.name.toLowerCase().includes(searchInput.trim().toLowerCase())
+        )
+      : products;
 
   return (
     <>
       <div className="bg-background">
-        <img className="m-auto object-cover mt-[-104px]"
+        <img
+          className="m-auto object-cover mt-[-104px]"
           src={introImg}
-          alt="Intro Image" />
+          alt="Intro Image"
+        />
       </div>
       <main className="mx-auto px-4 sm:px-6 lg:px-12 max-w-7xl">
-        <div className="flex flex-col sm:flex-row mt-[-120px] sm:mt-[-130px] md:mt-[-200px] lg:mt-[-300px] items-center justify-between gap-8">
-          <h1 className="text-2xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold whitespace-nowrap">Nossos Cafés</h1>
-          <div className="w-full sm:flex-1 relative items-center">
-            <MagnifyingGlass size={22} weight="bold" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input type="text" placeholder="Buscar produto" className="w-full p-4 pl-10 pr-3 rounded-lg shadow-lg 
-             border-2 focus:outline-none focus:border-orange-500"
+        <div className="flex flex-col sm:flex-row mt-[-120px] sm:mt-[-130px] md:mt-[-200px] lg:mt-[-300px] items-center justify-between gap-6 px-2 sm:px-0">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-secondary drop-shadow-md whitespace-nowrap">
+            Nossos Cafés
+          </h1>
+          <div className="w-full sm:max-w-xl relative flex items-center">
+            <MagnifyingGlass
+              size={24}
+              weight="bold"
+              className="absolute left-4 text-primary"
+            />
+            <input
+              type="text"
+              placeholder="Buscar produto..."
+              className="w-full py-4 pl-12 pr-6 rounded-2xl shadow-lg border border-transparent bg-white text-secondary outline-none focus-visible:ring-2 focus-visible:ring-primary transition-all placeholder:text-secondary/50 text-base"
               onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
         </div>
-        <div className=" mt-10 mb-[300px]">
+
+        <div className="mt-12 mb-[300px]">
           {filteredProducts.length > 0 ? (
-            <div className="grid gap-8  md:grid-cols-3 sm:grid-cols-2 xs:grid-cols-1">
-              {filteredProducts.map(product => (
+            <div className="grid gap-8 md:grid-cols-3 sm:grid-cols-2 xs:grid-cols-1">
+              {filteredProducts.map((product) => (
                 <ProductItem key={product.id} product={product} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-xl text-gray-600">
-                Nenhum produto encontrado
+            <div className="text-center py-16 bg-card rounded-2xl border border-light border-dashed">
+              <p className="text-lg text-secondary/70 font-medium">
+                Nenhum produto encontrado para a sua busca.
               </p>
             </div>
           )}
         </div>
         <div className="flex flex-col mb-[300px]">
           <section id="delivery" className="scroll-mt-[104px]">
-            <h2 className="text-2xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold">Como utilizar o serviço de entrega</h2>
+            <h2 className="text-2xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold">
+              Como utilizar o serviço de entrega
+            </h2>
             <div className="flex justify-around mt-7 flex-wrap">
               <div className="flex flex-col gap-4 items-center">
                 <img src={chooseYourCoffee} alt="Escolha seu café" />
@@ -63,7 +76,9 @@ export default function Home() {
               </div>
               <div className="flex flex-col gap-4 items-center">
                 <img src={foodTruck} alt="Nós entregamos para você" />
-                <h3 className="font-semibold text-xl">Nós entregamos para você</h3>
+                <h3 className="font-semibold text-xl">
+                  Nós entregamos para você
+                </h3>
                 <p>Escolha o serviço de entrega</p>
               </div>
               <div className="flex flex-col gap-4 items-center">
@@ -77,7 +92,11 @@ export default function Home() {
       </main>
       <footer id="about-us" className="relative bg-[#FDF6EC]">
         <div className="absolute inset-0 overflow-hidden">
-          <img src={aboutUsBg} alt="" className="w-full h-full object-cover opacity-50" />
+          <img
+            src={aboutUsBg}
+            alt=""
+            className="w-full h-full object-cover opacity-50"
+          />
         </div>
         <div className="relative mx-auto px-4 sm:px-6 lg:px-12 max-w-7xl py-12">
           <div className="flex flex-col md:flex-row items-center md:items-stretch gap-8">
@@ -89,13 +108,21 @@ export default function Home() {
               />
             </div>
             <div className="w-full md:w-1/2 flex flex-col justify-center space-y-4 text-center md:text-left">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold">Sobre Nós</h2>
-              <h3 className="font-semibold text-lg sm:text-xl">Fornecemos café de qualidade e pronto para entregar.</h3>
-              <p className="text-sm sm:text-base">Somos uma empresa que fabrica e distribui deliciosas bebidas. Nosso principal produto é feito com uma receita secreta e está disponível em lojas de todo o mundo.</p>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold">
+                Sobre Nós
+              </h2>
+              <h3 className="font-semibold text-lg sm:text-xl">
+                Fornecemos café de qualidade e pronto para entregar.
+              </h3>
+              <p className="text-sm sm:text-base">
+                Somos uma empresa que fabrica e distribui deliciosas bebidas.
+                Nosso principal produto é feito com uma receita secreta e está
+                disponível em lojas de todo o mundo.
+              </p>
             </div>
           </div>
         </div>
       </footer>
     </>
-  )
+  );
 }
