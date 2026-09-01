@@ -13,8 +13,14 @@ const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 export default function ShoppingCart() {
-  const { cart, totalPrice, removeFromCart, updateQuantity, clearCart } =
-    useContext(CartContext);
+  const {
+    cart,
+    totalItems,
+    totalPrice,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+  } = useContext(CartContext);
   const formRef = useRef<UseFormReturn<OrderFormData>>();
   const [orderData, setOrderData] = useState<OrderFormData | null>(null);
 
@@ -39,7 +45,6 @@ export default function ShoppingCart() {
   return (
     <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pb-16 pt-8">
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_450px] gap-10 xl:gap-12 items-start">
-        {/* Coluna Esquerda: Formulário */}
         <section className="flex flex-col gap-6">
           <h1 className="font-bold text-2xl text-secondary font-sans tracking-tight">
             Complete seu pedido
@@ -51,7 +56,6 @@ export default function ShoppingCart() {
           />
         </section>
 
-        {/* Coluna Direita: Carrinho */}
         <aside className="flex flex-col gap-6 sticky top-[120px]">
           <h2 className="font-bold text-2xl text-secondary font-sans tracking-tight">
             Cafés selecionados
@@ -146,7 +150,8 @@ export default function ShoppingCart() {
                     <Elements stripe={stripePromise}>
                       <StripeCheckout
                         cartItems={cartItemsArray}
-                        selectedPaymentMethod={orderData.paymentMethod}
+                        orderData={orderData}
+                        cartTotals={{ totalItems, deliveryFee, totalPrice }}
                         formRef={formRef}
                       />
                     </Elements>

@@ -1,24 +1,28 @@
 import { useElements, useStripe } from '@stripe/react-stripe-js';
 import { useCallback, useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { OrderFormData } from '../components/OrderForm';
 import { CartContext } from '../context/CartProvider';
-import { CartItem } from '../types/cart';
+import { CartItem, CompletedOrder } from '../types/cart';
 
 export function useStripeCheckout() {
   const stripe = useStripe();
   const elements = useElements();
-  const navigate = useNavigate();
   const { clearCart } = useContext(CartContext);
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
 
   const processCheckout = useCallback(
     async (
       cartItems: CartItem[],
-      selectedPaymentMethod: string,
+      orderData: OrderFormData,
+      cartTotals: {
+        totalItems: number;
+        deliveryFee: number;
+        totalPrice: number;
+      },
       resetForm?: () => void
     ) => {
-      if (!selectedPaymentMethod) {
+      if (!orderData.paymentMethod) {
         toast.error('Selecione um método de pagamento.');
         return;
       }
@@ -31,7 +35,8 @@ export function useStripeCheckout() {
       setIsProcessingCheckout(true);
 
       try {
-        const apiUrl = import.meta.env.VITE_API_BASE_URL;
+        const apiUrl =
+          import.meta.env.VITE_API_BASE_URL || 'http://localhost:3333';
         const response = await fetch(`${apiUrl}/create-checkout-session`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -42,6 +47,22 @@ export function useStripeCheckout() {
 
         const data = await response.json();
         if (!data.url) throw new Error('URL de checkout inválida');
+
+        const completedOrder: CompletedOrder = {
+          ...orderData,
+          products: cartItems.map((item) => ({
+            id: item.id.toString(),
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image,
+          })),
+          totalItems: cartTotals.totalItems,
+          deliveryFee: cartTotals.deliveryFee,
+          totalPrice: cartTotals.totalPrice,
+        };
+
+        localStorage.setItem('completed-order', JSON.stringify(completedOrder));
 
         clearCart();
         localStorage.removeItem('coffee-cart');
@@ -58,7 +79,7 @@ export function useStripeCheckout() {
         setIsProcessingCheckout(false);
       }
     },
-    [stripe, elements, clearCart, navigate]
+    [stripe, elements, clearCart]
   );
 
   return { processCheckout, isProcessingCheckout };

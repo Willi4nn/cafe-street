@@ -36,20 +36,16 @@ export function useCart(): CartContextType {
     quantity: number
   ): Promise<void> => {
     setCart((prevCart) => {
-      // 1. Criamos um clone exato do carrinho anterior (Nova referência de memória)
       const updatedCart = { ...prevCart };
 
-      // 2. Aplicamos a lógica de negócio no clone
       if (updatedCart[product.id]) {
         updatedCart[product.id].quantity += quantity;
       } else {
         updatedCart[product.id] = { ...product, quantity };
       }
 
-      // 3. Atualizamos o Local Storage usando o objeto clonado
       localStorage.setItem('coffee-cart', JSON.stringify(updatedCart));
 
-      // 4. Retornamos a nova referência. Isso OBRIGA o React a re-renderizar a UI instantaneamente.
       return updatedCart;
     });
   };
@@ -58,7 +54,7 @@ export function useCart(): CartContextType {
     setCart((prevCart) => {
       const updatedCart = { ...prevCart };
 
-      delete updatedCart[productId]; // Remove o item do clone
+      delete updatedCart[productId];
 
       localStorage.setItem('coffee-cart', JSON.stringify(updatedCart));
       return updatedCart;

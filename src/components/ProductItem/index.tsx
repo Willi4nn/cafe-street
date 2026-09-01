@@ -36,7 +36,6 @@ export function ProductItem({ product }: ProductItemProps) {
       className="flex flex-col bg-card rounded-2xl shadow-sm p-4 gap-4 min-w-[250px] border border-transparent hover:border-primary/20 hover:shadow-lg transition-all duration-300 focus-within:ring-2 focus-within:ring-primary"
       aria-labelledby={`product-title-${product.id}`}
     >
-      {/* Imagem do Produto com aspect-ratio nativo em vez de heights hardcoded */}
       <figure className="relative aspect-square w-full rounded-xl overflow-hidden bg-light group">
         <img
           src={product.image}

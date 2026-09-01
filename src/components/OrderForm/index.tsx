@@ -33,7 +33,7 @@ export type OrderFormData = z.infer<typeof orderFormSchema>;
 interface OrderFormProps {
   onOrderSubmit: (data: OrderFormData) => void;
   formRef?: React.MutableRefObject<UseFormReturn<OrderFormData> | undefined>;
-  disabled?: boolean; // Nova propriedade adicionada
+  disabled?: boolean;
 }
 
 export default function OrderForm({
@@ -91,7 +91,6 @@ export default function OrderForm({
       onSubmit={handleSubmit(onOrderSubmit)}
       className="flex flex-col gap-8 w-full"
     >
-      {/* Endereço Section */}
       <section
         aria-labelledby="shipping-address-title"
         className="flex flex-col gap-8 p-8 rounded-xl bg-card shadow-sm"
@@ -231,7 +230,6 @@ export default function OrderForm({
         </div>
       </section>
 
-      {/* Pagamento Section */}
       <section
         aria-labelledby="payment-method-title"
         className="flex flex-col gap-8 p-8 rounded-xl bg-card shadow-sm"
