@@ -4,9 +4,10 @@ import {
   CreditCard,
   CurrencyDollar,
   MapPin,
+  Spinner,
 } from '@phosphor-icons/react';
 import axios from 'axios';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, UseFormReturn, useForm } from 'react-hook-form';
 import InputMask from 'react-input-mask';
 import { toast } from 'react-toastify';
@@ -41,6 +42,8 @@ export default function OrderForm({
   formRef,
   disabled = false,
 }: OrderFormProps) {
+  const [isFetchingCep, setIsFetchingCep] = useState(false);
+
   const methods = useForm<OrderFormData>({
     resolver: zodResolver(orderFormSchema),
     defaultValues: {
@@ -61,6 +64,7 @@ export default function OrderForm({
     setValue,
     control,
     watch,
+    setFocus,
     formState: { errors },
   } = methods;
   const cep = watch('cep');
@@ -72,18 +76,30 @@ export default function OrderForm({
   useEffect(() => {
     const cleanedCep = cep?.replace(/\D/g, '');
     if (cleanedCep?.length === 8) {
+      setIsFetchingCep(true);
       axios
         .get(`https://viacep.com.br/ws/${cleanedCep}/json/`)
         .then(({ data }) => {
-          if (data.erro) return toast.error('CEP não encontrado.');
+          if (data.erro) {
+            toast.error('CEP não encontrado.', { toastId: 'cep-error' });
+            return;
+          }
           setValue('street', data.logradouro || '');
           setValue('neighborhood', data.bairro || '');
           setValue('city', data.localidade || '');
           setValue('state', data.uf || '');
+
+          setFocus('number');
         })
-        .catch(() => toast.error('Erro ao buscar o CEP.'));
+        .catch(() =>
+          toast.error('Erro ao buscar o CEP.', { toastId: 'cep-fetch-error' })
+        )
+        .finally(() => setIsFetchingCep(false));
     }
-  }, [cep, setValue]);
+  }, [cep, setValue, setFocus]);
+
+  const inputBaseClass =
+    'w-full p-3 rounded-lg bg-light text-secondary border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60 disabled:cursor-not-allowed';
 
   return (
     <form
@@ -91,27 +107,21 @@ export default function OrderForm({
       onSubmit={handleSubmit(onOrderSubmit)}
       className="flex flex-col gap-8 w-full"
     >
-      <section
-        aria-labelledby="shipping-address-title"
-        className="flex flex-col gap-8 p-8 rounded-xl bg-card shadow-sm"
-      >
+      <section className="flex flex-col gap-8 p-6 sm:p-8 rounded-2xl bg-card shadow-sm border border-light/50">
         <header className="flex gap-4 items-start">
-          <MapPin className="text-primary mt-1" size={24} aria-hidden="true" />
+          <MapPin className="text-primary mt-1" size={24} weight="fill" />
           <div className="flex flex-col gap-1">
-            <h2
-              id="shipping-address-title"
-              className="text-lg font-semibold text-secondary"
-            >
+            <h2 className="text-lg font-bold text-secondary">
               Endereço de Entrega
             </h2>
-            <p className="text-sm text-secondary/80 leading-relaxed">
+            <p className="text-sm text-secondary/70">
               Informe o endereço onde deseja receber seu pedido
             </p>
           </div>
         </header>
 
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2 max-w-[200px]">
+          <div className="flex flex-col gap-2 max-w-[240px] relative">
             <Controller
               name="cep"
               control={control}
@@ -120,14 +130,19 @@ export default function OrderForm({
                   {...field}
                   mask="99999-999"
                   placeholder="CEP"
-                  aria-invalid={!!errors.cep}
-                  disabled={disabled}
-                  className="w-full p-3 rounded-lg bg-light text-secondary border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  disabled={disabled || isFetchingCep}
+                  className={`${inputBaseClass} ${errors.cep ? 'border-red-500' : 'border-transparent'}`}
                 />
               )}
             />
+            {isFetchingCep && (
+              <Spinner
+                className="absolute right-3 top-3.5 animate-spin text-primary"
+                size={20}
+              />
+            )}
             {errors.cep && (
-              <span className="text-xs text-red-500 font-medium" role="alert">
+              <span className="text-xs text-red-500 font-medium">
                 {errors.cep.message}
               </span>
             )}
@@ -137,13 +152,12 @@ export default function OrderForm({
             <input
               type="text"
               placeholder="Rua"
-              aria-invalid={!!errors.street}
               disabled={disabled}
               {...register('street')}
-              className="w-full p-3 rounded-lg bg-light text-secondary border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              className={`${inputBaseClass} ${errors.street ? 'border-red-500' : 'border-transparent'}`}
             />
             {errors.street && (
-              <span className="text-xs text-red-500 font-medium" role="alert">
+              <span className="text-xs text-red-500 font-medium">
                 {errors.street.message}
               </span>
             )}
@@ -154,13 +168,12 @@ export default function OrderForm({
               <input
                 type="number"
                 placeholder="Número"
-                aria-invalid={!!errors.number}
                 disabled={disabled}
                 {...register('number')}
-                className="w-full p-3 rounded-lg bg-light text-secondary border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className={`${inputBaseClass} ${errors.number ? 'border-red-500' : 'border-transparent'}`}
               />
               {errors.number && (
-                <span className="text-xs text-red-500 font-medium" role="alert">
+                <span className="text-xs text-red-500 font-medium">
                   {errors.number.message}
                 </span>
               )}
@@ -171,9 +184,9 @@ export default function OrderForm({
                 placeholder="Complemento"
                 disabled={disabled}
                 {...register('complement')}
-                className="w-full p-3 pr-20 rounded-lg bg-light text-secondary border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className={`${inputBaseClass} border-transparent pr-24`}
               />
-              <span className="absolute right-4 top-3.5 text-xs text-secondary/50 italic pointer-events-none hidden sm:block">
+              <span className="absolute right-4 top-3.5 text-xs font-semibold text-secondary/40 pointer-events-none">
                 Opcional
               </span>
             </div>
@@ -184,13 +197,12 @@ export default function OrderForm({
               <input
                 type="text"
                 placeholder="Bairro"
-                aria-invalid={!!errors.neighborhood}
                 disabled={disabled}
                 {...register('neighborhood')}
-                className="w-full p-3 rounded-lg bg-light text-secondary focus-visible:ring-2 focus-visible:ring-primary outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                className={`${inputBaseClass} ${errors.neighborhood ? 'border-red-500' : 'border-transparent'}`}
               />
               {errors.neighborhood && (
-                <span className="text-xs text-red-500" role="alert">
+                <span className="text-xs text-red-500">
                   {errors.neighborhood.message}
                 </span>
               )}
@@ -199,13 +211,12 @@ export default function OrderForm({
               <input
                 type="text"
                 placeholder="Cidade"
-                aria-invalid={!!errors.city}
                 disabled={disabled}
                 {...register('city')}
-                className="w-full p-3 rounded-lg bg-light text-secondary focus-visible:ring-2 focus-visible:ring-primary outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                className={`${inputBaseClass} ${errors.city ? 'border-red-500' : 'border-transparent'}`}
               />
               {errors.city && (
-                <span className="text-xs text-red-500" role="alert">
+                <span className="text-xs text-red-500">
                   {errors.city.message}
                 </span>
               )}
@@ -214,14 +225,13 @@ export default function OrderForm({
               <input
                 type="text"
                 placeholder="UF"
-                aria-invalid={!!errors.state}
+                maxLength={2}
                 disabled={disabled}
                 {...register('state')}
-                className="w-full p-3 rounded-lg bg-light text-secondary focus-visible:ring-2 focus-visible:ring-primary outline-none uppercase disabled:opacity-60 disabled:cursor-not-allowed"
-                maxLength={2}
+                className={`${inputBaseClass} uppercase ${errors.state ? 'border-red-500' : 'border-transparent'}`}
               />
               {errors.state && (
-                <span className="text-xs text-red-500" role="alert">
+                <span className="text-xs text-red-500">
                   {errors.state.message}
                 </span>
               )}
@@ -230,25 +240,17 @@ export default function OrderForm({
         </div>
       </section>
 
-      <section
-        aria-labelledby="payment-method-title"
-        className="flex flex-col gap-8 p-8 rounded-xl bg-card shadow-sm"
-      >
+      <section className="flex flex-col gap-8 p-6 sm:p-8 rounded-2xl bg-card shadow-sm border border-light/50">
         <header className="flex gap-4 items-start">
           <CurrencyDollar
             className="text-primary mt-1"
             size={24}
-            aria-hidden="true"
+            weight="regular"
           />
           <div className="flex flex-col gap-1">
-            <h2
-              id="payment-method-title"
-              className="text-lg font-semibold text-secondary"
-            >
-              Pagamento
-            </h2>
-            <p className="text-sm text-secondary/80 leading-relaxed">
-              O pagamento é feito na entrega. Escolha a forma que deseja pagar
+            <h2 className="text-lg font-bold text-secondary">Pagamento</h2>
+            <p className="text-sm text-secondary/70">
+              O pagamento é feito na entrega. Escolha a forma de pagamento.
             </p>
           </div>
         </header>
@@ -257,11 +259,7 @@ export default function OrderForm({
           name="paymentMethod"
           control={control}
           render={({ field }) => (
-            <div
-              className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-              role="radiogroup"
-              aria-label="Métodos de Pagamento"
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 { id: 'Cartão de Crédito', icon: CreditCard },
                 { id: 'Cartão de Débito', icon: Bank },
@@ -271,14 +269,18 @@ export default function OrderForm({
                   <button
                     key={id}
                     type="button"
-                    role="radio"
-                    aria-checked={isSelected}
                     disabled={disabled}
                     onClick={() => field.onChange(id)}
-                    className={`flex items-center justify-center gap-2 p-4 rounded-lg border uppercase text-xs tracking-wider font-semibold transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed
-                      ${isSelected ? 'bg-primary/10 border-primary text-secondary' : 'bg-light border-transparent text-secondary/70 hover:bg-light/80 hover:text-secondary'}`}
+                    className={`flex items-center justify-center gap-3 p-4 rounded-xl border-2 uppercase text-xs tracking-wider font-bold transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60 disabled:cursor-not-allowed
+                      ${isSelected ? 'bg-primary/10 border-primary text-secondary' : 'bg-light border-transparent text-secondary/60 hover:bg-light/80 hover:text-secondary'}`}
                   >
-                    <Icon size={16} className="text-primary" /> {id}
+                    <Icon
+                      size={20}
+                      className={
+                        isSelected ? 'text-primary' : 'text-secondary/60'
+                      }
+                    />{' '}
+                    {id}
                   </button>
                 );
               })}
@@ -286,7 +288,7 @@ export default function OrderForm({
           )}
         />
         {errors.paymentMethod && (
-          <span className="text-xs text-red-500 font-medium" role="alert">
+          <span className="text-xs text-red-500 font-medium -mt-4">
             {errors.paymentMethod.message}
           </span>
         )}
@@ -295,7 +297,7 @@ export default function OrderForm({
       <button
         type="submit"
         disabled={disabled}
-        className="w-full mt-2 py-3 px-4 rounded-lg bg-primary text-white font-bold tracking-wide uppercase transition-all duration-200 hover:bg-primary/90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full py-4 px-4 rounded-xl bg-primary text-white font-bold tracking-wide uppercase transition-all duration-300 hover:bg-primary/90 hover:shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.98]"
       >
         Confirmar Dados
       </button>

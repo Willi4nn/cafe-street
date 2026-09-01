@@ -1,3 +1,4 @@
+import { Check } from '@phosphor-icons/react';
 import { useCallback, useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 import { CartContext } from '../../context/CartProvider';
@@ -15,6 +16,7 @@ export function ProductItem({ product }: ProductItemProps) {
 
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleAddToCart = useCallback(async () => {
     if (quantity <= 0) return;
@@ -22,10 +24,17 @@ export function ProductItem({ product }: ProductItemProps) {
     setIsAdding(true);
     try {
       await addToCart(product, quantity);
-      toast.success(`${product.name} adicionado ao carrinho!`);
+
+      toast.success(`${quantity}x ${product.name} adicionado!`, {
+        toastId: `cart-add-${product.id}`,
+        autoClose: 2000,
+      });
+
+      setIsSuccess(true);
+      setTimeout(() => setIsSuccess(false), 2000);
       setQuantity(1);
     } catch {
-      toast.error('Houve um erro ao adicionar seu produto.');
+      toast.error('Erro ao adicionar produto.', { toastId: 'cart-error' });
     } finally {
       setIsAdding(false);
     }
@@ -92,11 +101,17 @@ export function ProductItem({ product }: ProductItemProps) {
             max={99}
             aria-label="Selecionar quantidade"
           />
-          <CartIcon
-            onConfirm={handleAddToCart}
-            isLoading={isAdding}
-            aria-label={`Adicionar ${quantity} ${product.name} ao carrinho`}
-          />
+          {isSuccess ? (
+            <div className="flex items-center justify-center p-2 rounded-lg bg-green-500 text-white w-10 h-10 transition-all">
+              <Check size={24} weight="bold" />
+            </div>
+          ) : (
+            <CartIcon
+              onConfirm={handleAddToCart}
+              isLoading={isAdding}
+              aria-label={`Adicionar ${quantity} ${product.name} ao carrinho`}
+            />
+          )}
         </footer>
       </div>
     </article>

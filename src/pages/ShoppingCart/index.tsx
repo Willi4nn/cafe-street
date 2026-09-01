@@ -1,8 +1,9 @@
-import { Trash } from '@phosphor-icons/react';
+import { ArrowLeft, Trash } from '@phosphor-icons/react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useCallback, useContext, useRef, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
+import { Link } from 'react-router-dom';
 import OrderForm, { OrderFormData } from '../../components/OrderForm';
 import QuantitySelector from '../../components/QuantitySelector';
 import StripeCheckout from '../../components/StripeCheckout';
@@ -29,11 +30,8 @@ export default function ShoppingCart() {
 
   const handleUpdateQuantity = useCallback(
     (productId: string, quantity: number) => {
-      if (quantity > 0) {
-        updateQuantity(productId, quantity);
-      } else {
-        removeFromCart(productId);
-      }
+      if (quantity > 0) updateQuantity(productId, quantity);
+      else removeFromCart(productId);
     },
     [updateQuantity, removeFromCart]
   );
@@ -43,7 +41,7 @@ export default function ShoppingCart() {
   }, []);
 
   return (
-    <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pb-16 pt-8">
+    <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pb-24 pt-8">
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_450px] gap-10 xl:gap-12 items-start">
         <section className="flex flex-col gap-6">
           <h1 className="font-bold text-2xl text-secondary font-sans tracking-tight">
@@ -61,12 +59,27 @@ export default function ShoppingCart() {
             Cafés selecionados
           </h2>
 
-          <div className="flex flex-col p-6 sm:p-8 bg-card rounded-[8px_36px_8px_36px] shadow-md border border-light/50 w-full gap-8">
+          <div className="flex flex-col p-6 sm:p-8 bg-card rounded-[8px_36px_8px_36px] shadow-sm border border-light/50 w-full gap-8">
             {isCartEmpty ? (
-              <div className="flex flex-col items-center justify-center py-12 gap-4">
-                <p className="text-center text-secondary/60 font-medium">
-                  Seu carrinho está vazio.
-                </p>
+              <div className="flex flex-col items-center justify-center py-12 gap-6 text-center">
+                <div className="w-20 h-20 bg-light rounded-full flex items-center justify-center">
+                  <span className="text-4xl">☕</span>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-bold text-xl text-secondary">
+                    Seu carrinho está vazio
+                  </h3>
+                  <p className="text-secondary/70 font-medium">
+                    Volte ao cardápio e adicione cafés deliciosos.
+                  </p>
+                </div>
+                <Link
+                  to="/"
+                  className="mt-2 flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold uppercase tracking-wider rounded-xl transition-all hover:bg-primary/90 hover:shadow-lg active:scale-95"
+                >
+                  <ArrowLeft weight="bold" size={20} />
+                  Ver Cardápio
+                </Link>
               </div>
             ) : (
               <>
@@ -79,13 +92,13 @@ export default function ShoppingCart() {
                       <div className="flex gap-4 sm:gap-6 items-start w-full">
                         <img
                           src={product.image}
-                          alt={`Foto do café ${product.name}`}
+                          alt={product.name}
                           className="w-16 h-16 sm:w-20 sm:h-20 object-contain shrink-0"
                           loading="lazy"
                         />
                         <div className="flex flex-col gap-3 w-full">
                           <div className="flex justify-between items-start w-full">
-                            <span className="text-secondary font-medium text-base">
+                            <span className="text-secondary font-bold text-base">
                               {product.name}
                             </span>
                             <span className="font-bold text-secondary">
@@ -95,8 +108,7 @@ export default function ShoppingCart() {
                                 .replace('.', ',')}
                             </span>
                           </div>
-
-                          <div className="flex flex-wrap gap-2 items-center">
+                          <div className="flex flex-wrap gap-3 items-center">
                             <QuantitySelector
                               quantityInCart={product.quantity}
                               onChange={(qty) =>
@@ -107,13 +119,11 @@ export default function ShoppingCart() {
                               onClick={() =>
                                 removeFromCart(product.id.toString())
                               }
-                              aria-label={`Remover ${product.name} do carrinho`}
-                              className="flex items-center gap-1.5 bg-light px-3 py-2 rounded-lg text-xs uppercase text-secondary/80 hover:bg-light/80 hover:text-red-500 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none font-semibold tracking-wider"
+                              className="flex items-center gap-1.5 bg-light px-3 py-2 rounded-lg text-xs uppercase text-secondary/70 hover:bg-red-50 hover:text-red-500 transition-colors focus-visible:ring-2 focus-visible:ring-red-500 outline-none font-bold tracking-wider group"
                             >
                               <Trash
                                 size={16}
                                 className="text-primary group-hover:text-red-500 transition-colors"
-                                aria-hidden="true"
                               />{' '}
                               Remover
                             </button>
@@ -124,10 +134,7 @@ export default function ShoppingCart() {
                   ))}
                 </ul>
 
-                <section
-                  aria-label="Resumo dos valores"
-                  className="flex flex-col gap-3 text-sm text-secondary/80 pt-6 border-t border-light"
-                >
+                <section className="flex flex-col gap-3 text-sm font-medium text-secondary/80 pt-6 border-t border-light">
                   <div className="flex justify-between">
                     <span>Total de itens</span>
                     <span>
@@ -139,13 +146,13 @@ export default function ShoppingCart() {
                     <span>Entrega</span>
                     <span>R$ {deliveryFee.toFixed(2).replace('.', ',')}</span>
                   </div>
-                  <div className="flex justify-between text-xl font-bold text-secondary pt-4">
+                  <div className="flex justify-between text-2xl font-black text-secondary pt-4">
                     <span>Total</span>
                     <span>R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
                   </div>
                 </section>
 
-                <div className="flex flex-col gap-4 mt-2">
+                <div className="flex flex-col gap-3 mt-4">
                   {orderData && stripePromise && (
                     <Elements stripe={stripePromise}>
                       <StripeCheckout
@@ -158,10 +165,9 @@ export default function ShoppingCart() {
                   )}
                   <button
                     onClick={clearCart}
-                    aria-label="Limpar todo o carrinho"
-                    className="w-full py-3 rounded-lg border-2 border-transparent bg-light text-secondary font-semibold text-sm uppercase tracking-wide transition-all hover:bg-light/80 focus-visible:border-primary outline-none"
+                    className="w-full py-3 rounded-xl border-2 border-transparent bg-light text-secondary font-bold text-sm uppercase tracking-wide transition-all hover:bg-light/80 outline-none focus-visible:ring-2 focus-visible:ring-secondary/50"
                   >
-                    Limpar Carrinho
+                    Esvaziar Carrinho
                   </button>
                 </div>
               </>

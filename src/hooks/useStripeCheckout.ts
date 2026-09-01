@@ -23,12 +23,16 @@ export function useStripeCheckout() {
       resetForm?: () => void
     ) => {
       if (!orderData.paymentMethod) {
-        toast.error('Selecione um método de pagamento.');
+        toast.error('Selecione um método de pagamento.', {
+          toastId: 'payment-method-error',
+        });
         return;
       }
 
       if (!stripe || !elements) {
-        toast.error('Serviço de pagamento indisponível no momento.');
+        toast.error('Serviço de pagamento indisponível no momento.', {
+          toastId: 'stripe-error',
+        });
         return;
       }
 
@@ -73,7 +77,8 @@ export function useStripeCheckout() {
         toast.error(
           error instanceof Error
             ? error.message
-            : 'Erro ao processar pagamento.'
+            : 'Erro ao processar pagamento.',
+          { toastId: 'checkout-error' }
         );
       } finally {
         setIsProcessingCheckout(false);

@@ -1,3 +1,4 @@
+import { Spinner } from '@phosphor-icons/react';
 import { UseFormReturn } from 'react-hook-form';
 import { useStripeCheckout } from '../../hooks/useStripeCheckout';
 import { CartItem } from '../../types/cart';
@@ -23,15 +24,23 @@ export default function StripeCheckout({
     processCheckout(cartItems, orderData, cartTotals, formRef.current?.reset);
   };
 
+  const isReadyToPay = !!orderData.paymentMethod;
+
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <button
         type="submit"
-        aria-label="Confirmar e finalizar pedido"
-        disabled={isProcessingCheckout || !orderData.paymentMethod}
-        className="w-full py-3 px-4 rounded-lg bg-primary text-white font-bold tracking-wide uppercase transition-all duration-200 hover:bg-primary/90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
+        disabled={isProcessingCheckout || !isReadyToPay}
+        className={`w-full flex items-center justify-center gap-2 py-4 px-4 rounded-xl font-bold tracking-wide uppercase transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/50 active:scale-[0.98]
+          ${isReadyToPay ? 'bg-[#EBC136] text-white hover:bg-[#D9A321] hover:shadow-lg' : 'bg-light text-secondary/40 cursor-not-allowed'}`}
       >
-        {isProcessingCheckout ? 'Processando...' : 'Confirmar Pedido'}
+        {isProcessingCheckout ? (
+          <>
+            <Spinner className="animate-spin" size={20} /> Processando...
+          </>
+        ) : (
+          'Confirmar Pagamento'
+        )}
       </button>
     </form>
   );
