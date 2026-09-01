@@ -53,6 +53,8 @@ export function useStripeCheckout() {
         if (!data.url) throw new Error('URL de checkout inválida');
 
         const completedOrder: CompletedOrder = {
+          id: crypto.randomUUID(),
+          date: new Date().toISOString(),
           ...orderData,
           products: cartItems.map((item) => ({
             id: item.id.toString(),
@@ -67,6 +69,14 @@ export function useStripeCheckout() {
         };
 
         localStorage.setItem('completed-order', JSON.stringify(completedOrder));
+
+        const history = JSON.parse(
+          localStorage.getItem('orders-history') || '[]'
+        );
+        localStorage.setItem(
+          'orders-history',
+          JSON.stringify([completedOrder, ...history])
+        );
 
         clearCart();
         localStorage.removeItem('coffee-cart');

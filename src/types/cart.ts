@@ -1,4 +1,4 @@
-import { OrderFormData } from "../components/OrderForm";
+import { OrderFormData } from '../components/OrderForm';
 
 export interface Product {
   id: number;
@@ -28,6 +28,8 @@ export interface CartContextType {
 }
 
 export interface CompletedOrder extends OrderFormData {
+  id: string;
+  date: string;
   products: {
     id: string;
     name: string;
